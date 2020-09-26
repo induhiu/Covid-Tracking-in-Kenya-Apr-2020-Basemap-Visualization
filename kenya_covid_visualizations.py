@@ -13,7 +13,7 @@ import os
 os.environ["PROJ_LIB"] = 'C:\\Users\\nderi\\.conda\\pkgs\\proj4-5.2.0-ha925a31_1\\Library\\share'
 from mpl_toolkits.basemap import Basemap
 
-def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory=""):
+def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", colorbar_scheme=""):
     ''' 
     Draws scatterplot Basemap map of Kenya and saves plot in given directory path
     
@@ -23,8 +23,9 @@ def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory=""):
         pop_density: Numpy array of values representing population density
         var_tested: Numpy array of values representing the variable of interest
         colorbar_label: String representing the colorbar title
-        directory: Optional string, directory path for saving file
-        
+        directory: (Optional) string, directory path for saving file
+        colorbar_scheme: (Optional) string, scheme for colorbar
+
     Returns:
         None
     '''
@@ -33,12 +34,13 @@ def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory=""):
     _ = plt.figure(figsize=(8,8))
     m = Basemap(projection='lcc', lat_0=0.0236, lon_0=37.9062, width=1E6
     , height=1.2E6, resolution='h')
+    m.shadedrelief()
     m.drawcoastlines(color='gray')
     m.drawcountries(color='gray')
-    m.fillcontinents(lake_color="aqua", zorder=0)
+    # m.fillcontinents(lake_color="aqua", zorder=0)
 
     # Draw scatterplot on the Basemap figure and include colorbar, legend
-    m.scatter(lons, lats, latlon=True, c=var_tested, s=pop_density, cmap='viridis', alpha=0.5)
+    m.scatter(lons, lats, latlon=True, c=var_tested, s=pop_density, cmap=colorbar_scheme, alpha=0.5)
     plt.colorbar(label=colorbar_label)
     for density in [100, 300, 500]:
         plt.scatter([],[],c='k',alpha=0.5,s=density, label=str(density) + ' individuals per km$^2$')
@@ -71,7 +73,8 @@ if __name__ == "__main__":
                  amenities_dataset["Latitude"].values,
                  amenities_dataset["Population Density"].values,
                  amenities_dataset[col].values, col,
-                 "Covid-19 Basic Amenities in Kenya Basemap Visualizations\\")
+                 "Covid-19 Basic Amenities in Kenya Visualized\\",
+                 'cividis')
 
     # Extract second dataset and merge with former dataset to get pop density, longitude and lat
     preparedness_dataset = pd.read_excel("Kenya Covid 19 Need Map - Preparedness Benchmark met.xlsx", sheet_name="Sheet1")
@@ -85,7 +88,8 @@ if __name__ == "__main__":
                      modified_dataset["Population Density"].values,
                      modified_dataset[col].values,
                      col,
-                     "Covid-19 Preparedness Check in Kenya Visualized\\")
+                     "Covid-19 Preparedness Check in Kenya Visualized\\",
+                     "viridis")
 
 
 

@@ -36,7 +36,7 @@ def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", 
     , height=1.2E6, resolution='h')
     m.shadedrelief()
     m.drawcoastlines(color='gray')
-    m.drawcountries(color='gray')
+    m.drawcountries(color='black', linewidth=1.0)
     # m.fillcontinents(lake_color="aqua", zorder=0)
 
     # Draw scatterplot on the Basemap figure and include colorbar, legend

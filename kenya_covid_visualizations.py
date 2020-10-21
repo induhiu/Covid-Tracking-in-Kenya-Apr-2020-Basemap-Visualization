@@ -7,13 +7,14 @@ sns.set()
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from matplotlib.widgets import TextBox
 
 # Get directory containing epsg file for Basemap import to work
 import os
 os.environ["PROJ_LIB"] = 'C:\\Users\\nderi\\.conda\\pkgs\\proj4-5.2.0-ha925a31_1\\Library\\share'
 from mpl_toolkits.basemap import Basemap
 
-def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", colorbar_scheme=""):
+def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", colorbar_scheme="", counties_below=None):
     ''' 
     Draws scatterplot Basemap map of Kenya and saves plot in given directory path
     
@@ -25,19 +26,18 @@ def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", 
         colorbar_label: String representing the colorbar title
         directory: (Optional) string, directory path for saving file
         colorbar_scheme: (Optional) string, scheme for colorbar
-
+        counties_below: (Optional) numpy values, counties below benchmark
     Returns:
         None
     '''
-
     # Draws background map of Kenya.
     _ = plt.figure(figsize=(8,8))
+
     m = Basemap(projection='lcc', lat_0=0.0236, lon_0=37.9062, width=1E6
     , height=1.2E6, resolution='h')
     m.shadedrelief()
     m.drawcoastlines(color='gray')
     m.drawcountries(color='black', linewidth=1.0)
-    # m.fillcontinents(lake_color="aqua", zorder=0)
 
     # Draw scatterplot on the Basemap figure and include colorbar, legend
     m.scatter(lons, lats, latlon=True, c=var_tested, s=pop_density, cmap=colorbar_scheme, alpha=0.5)
@@ -47,17 +47,32 @@ def draw_map(lons, lats, pop_density, var_tested, colorbar_label, directory="", 
     plt.legend(scatterpoints=1, frameon=False,
                labelspacing=1, loc='lower left')
 
+    # Format counties string and annotate counties below recommended on the basemap projection
+    if len(counties_below) > 0:
+        counties_str_formatted = ""
+        for i in range(len(counties_below)):
+            counties_str_formatted += counties_below[i]
+            if i != len(counties_below) - 1:
+                counties_str_formatted += ", "
+            if i % 3 == 0:
+                counties_str_formatted += '\n'
+        counties = "Counties below recommended:\n" + counties_str_formatted
+        
+        bbox_props = dict(fc='white', ec='green', lw=1, boxstyle='round,pad=0.1', alpha=0.2)
+        plt.annotate(counties, m(39,2.5), xytext=m(40,2.5), fontsize=8,
+             fontname='Arial', color='black', ha='center', va='center',
+            bbox= bbox_props)
+
     # Set plot title and save/show figure
     plt.title(colorbar_label + " against Population Density per county")    
     plt.savefig(directory + colorbar_label + " against Population density")
-
 
 
 if __name__ == "__main__":
     # Extract first dataset
     amenities_dataset = pd.read_excel("Kenya Covid-19 Need Map - Amenities Count.xlsx", sheet_name="Sheet1")
 
-    # Columns of interest in the first dataset
+    # # Columns of interest in the first dataset
     columns_to_visualize = ["# of Hospitals (Level 4,5,6)",
                             "# of Hospital Beds",
                             "# of ICU Beds",
@@ -83,13 +98,14 @@ if __name__ == "__main__":
     # Visualize covid-19 preparedness benchmark per Kenyan county
     for col in preparedness_dataset.columns:
         if col != "County":
+            counties_below = modified_dataset[modified_dataset[col] < 0]["County"].values
             draw_map(modified_dataset["Longitude"].values,
                      modified_dataset["Latitude"].values,
                      modified_dataset["Population Density"].values,
                      modified_dataset[col].values,
                      col,
                      "Covid-19 Preparedness Check in Kenya Visualized\\",
-                     "viridis")
+                     "Reds", counties_below)
 
 
 

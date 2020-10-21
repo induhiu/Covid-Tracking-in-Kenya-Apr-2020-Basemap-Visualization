@@ -16,5 +16,5 @@ For the visualizations where attainment of benchmark was being checked, the colo
 
 ## Sample results
  
-Below is a sample visualization: 
+Below is a sample visualization. This is drawn from the "Preparedness Check" visualizations and includes a list of counties that fall below recommended amenity level: 
 ![](https://github.com/induhiu/Covid-Tracking-in-Kenya-Apr-2020-Basemap-Visualization/blob/master/Covid-19%20Preparedness%20Check%20in%20Kenya%20Visualized/ICU%20Beds%20Benchmark%20Remaining%20against%20Population%20density.png)
